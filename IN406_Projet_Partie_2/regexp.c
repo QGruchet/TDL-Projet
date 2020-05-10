@@ -34,6 +34,23 @@ int indice_char(char c){//retourne l'indice correspondant au caractère dans le 
 	}
 }
 
+// ADERIV algo_recur(PILE *p, STATELISTE *table, char *expr){
+// 	ADERIV *a = NULL;
+
+// 	STATE etat_courant = depiler(p);
+// 	int indice = indice_char(expr[0]);
+// 	if(etat_courant == S || etat_courant == A || etat_courant == B || etat_courant == C || etat_courant == D || etat_courant == E || etat_courant == F){
+// 		for (int i = 0; i < table[etat_courant][indice].taille; ++i)
+// 		{
+// 			printf("yes\n");
+// 		}
+// 	}
+// 	if(etat_courant == POINT || etat_courant == PARO || etat_courant == PARF || etat_courant == PLUS || etat_courant == ETOILE || etat_courant == CAR) 
+// 		return a;
+
+// 	return a;
+// }
+
 ADERIV construire_arbre_derivation(char *expr){
 	STATELISTE table[7][7] = {//cette table représente la table des transitions de l'énoncé
 		{{-1},{-1},{-1},{2,{A,B}},{-1},{2,{A,B}},{-1}}, // transition quand le STATE S est lu
@@ -42,7 +59,7 @@ ADERIV construire_arbre_derivation(char *expr){
 		{{-1},{-1},{-1},{2,{E,F}},{-1},{2,{E,F}},{-1}},//STATE C
 		{{0},{3,{POINT,C,D}},{-1},{-1},{0},{-1},{0}},//STATE D
 		{{0},{0},{0},{3,{PARO,S,PARF}},{-1},{1,{CAR}},{-1}},//STATE E
-		{{0},{0},{2,{ETOILE,F}},{-1},{0},{-1},{0}}//STATE F
+		{{0},{0},{2,{ETOILE, F}},{-1},{0},{-1},{0}}//STATE F
 	};
 	//Une STATELISTE de taille 0 correspond à une règle dont la production est epsilon.
 	//Une STATELISTE de taille -1 correspond à une erreur (expression rejetée)
@@ -50,12 +67,16 @@ ADERIV construire_arbre_derivation(char *expr){
 	PILE p = nouvelle_pile(taille*2);
 	int symbole = 0;
 	int indice = 0;
+	ADERIV a;
 	
 	p = empiler(p, S);
 	affiche_pile(p);
-
+	a = nouvel_arbre(S, 0);
 	indice = indice_char(expr[0]);
 	symbole = p.contenu[p.sommet-1];
+
+	//a = algo_recur(&p, &table, &expr);
+
 
 	while(!est_vide(p))
 	{
@@ -67,44 +88,55 @@ ADERIV construire_arbre_derivation(char *expr){
 				switch(table[symbole][indice].taille)
 				{
 					case(0):
-						printf("0 element\n");
 						depiler(&p);
 						affiche_pile(p);
 						symbole = p.contenu[p.sommet-1];
-						printf("\n");
+
 						break;
 				
 					case(1):
-						printf("1 element\n");
 						depiler(&p);
-						p = empiler(p, table[symbole][indice].liste[0]);
+						// p = empiler(p, table[symbole][indice].liste[0]);
+						// affiche_pile(p);
+						for (int i = 0; i >= 0; --i)
+						{
+							p = empiler(p, table[symbole][indice].liste[i]);
+						}
 						affiche_pile(p);
 						symbole = p.contenu[p.sommet-1];
-						printf("\n");
+
 						break;
 				
 					case(2):
-						printf("2 element\n");
 						depiler(&p);
-						affiche_pile(p);
-						p = empiler(p, table[symbole][indice].liste[1]);
-						affiche_pile(p);
-						p = empiler(p, table[symbole][indice].liste[0]);
+						// p = empiler(p, table[symbole][indice].liste[1]);
+						// affiche_pile(p);
+						// p = empiler(p, table[symbole][indice].liste[0]);
+						// affiche_pile(p);
+						for (int i = 1; i >= 0; --i)
+						{
+							p = empiler(p, table[symbole][indice].liste[i]);
+						}
 						affiche_pile(p);
 						symbole = p.contenu[p.sommet-1];
-						printf("\n");
+
 						break;
 				
 					case(3):
 						depiler(&p);
-						p = empiler(p, table[symbole][indice].liste[2]);
-						affiche_pile(p);
-						p = empiler(p, table[symbole][indice].liste[1]);
-						affiche_pile(p);
-						p = empiler(p, table[symbole][indice].liste[0]);
+						// p = empiler(p, table[symbole][indice].liste[2]);
+						// affiche_pile(p);
+						// p = empiler(p, table[symbole][indice].liste[1]);
+						// affiche_pile(p);
+						// p = empiler(p, table[symbole][indice].liste[0]);
+						// affiche_pile(p);
+						for (int i = 2; i >= 0; --i)
+						{
+							p = empiler(p, table[symbole][indice].liste[i]);
+						}
 						affiche_pile(p);
 						symbole = p.contenu[p.sommet-1];
-						printf("\n");
+
 						break;	
 				}
 			}
@@ -118,8 +150,9 @@ ADERIV construire_arbre_derivation(char *expr){
 		//TERMINAL
 		if(symbole == POINT || symbole == PARO || symbole == PARF || symbole == PLUS || symbole == ETOILE || symbole == CAR)
 		{
-			if(p.sommet == 1)
+			if(p.sommet == 1 && expr[strlen(expr ) -1] == '#')
 				printf("Expression reconnu\n");
+			
 			printf("Depilement de |"); 
 			affiche_state(symbole);
 			printf("\n");
@@ -134,7 +167,7 @@ ADERIV construire_arbre_derivation(char *expr){
 			
 		}
 	}
-	return NULL;
+	return a;
 }
 
 void affiche_aderiv(ADERIV a, int space){//rendre joli
